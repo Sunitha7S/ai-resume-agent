@@ -460,9 +460,7 @@ async function processResume(config) {
       updateStatus("Submitting", resumeCount);
       await sleep(1000);
 
-      const submitBtn = document.querySelector(
-        'button:has-text("Submit Resume")'
-      ) || Array.from(document.querySelectorAll("button")).find((b) =>
+      const submitBtn = Array.from(document.querySelectorAll("button")).find((b) =>
         b.textContent?.includes("Submit Resume")
       );
 
@@ -516,11 +514,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.action === "SKIP_RESUME") {
-    const skipBtn =
-      document.querySelector('button:has-text("Skip")') ||
-      Array.from(document.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Skip")
-      );
+    const skipBtn = Array.from(document.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Skip")
+    );
     if (skipBtn) skipBtn.click();
     sendResponse({ success: true });
   }
