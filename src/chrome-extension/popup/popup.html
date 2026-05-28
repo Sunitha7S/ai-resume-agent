@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Resume Agent</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 360px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 20px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .header h1 { font-size: 16px; font-weight: 600; }
+    .header .badge {
+      background: #22c55e;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .config-section {
+      margin-bottom: 16px;
+    }
+    .config-section label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .config-section input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 13px;
+    }
+    .config-section input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .toggle-row label { font-size: 13px; }
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 20px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #475569;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+    .toggle .slider:before {
+      content: "";
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .slider { background-color: #3b82f6; }
+    .toggle input:checked + .slider:before { transform: translateX(20px); }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+    .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      background: #1e293b;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .status-item:last-child { margin-bottom: 0; }
+    .status-label { color: #94a3b8; }
+    .status-value { font-weight: 500; }
+    .status-value.active { color: #22c55e; }
+    .status-value.inactive { color: #ef4444; }
+    .log-area {
+      margin-top: 12px;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+      background: #0c1222;
+      border-radius: 6px;
+      padding: 8px;
+      color: #64748b;
+    }
+    .log-entry { margin-bottom: 2px; }
+    .log-entry.success { color: #22c55e; }
+    .log-entry.error { color: #ef4444; }
+    .log-entry.info { color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>AI Resume Agent</h1>
+    <span class="badge" id="versionBadge">v1.0</span>
+  </div>
+
+  <div class="config-section">
+    <label>OpenAI API Key</label>
+    <input type="password" id="apiKey" placeholder="sk-..." />
+  </div>
+
+  <div class="toggle-row">
+    <label>Auto-submit after fill</label>
+    <div class="toggle">
+      <input type="checkbox" id="autoSubmit" checked />
+      <span class="slider"></span>
+    </div>
+  </div>
+
+  <div class="toggle-row">
+    <label>Continuous mode</label>
+    <div class="toggle">
+      <input type="checkbox" id="continuousMode" />
+      <span class="slider"></span>
+    </div>
+  </div>
+
+  <div class="toggle-row">
+    <label>Human-like delays</label>
+    <div class="toggle">
+      <input type="checkbox" id="humanDelay" checked />
+      <span class="slider"></span>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="startBtn">Start Autofill</button>
+  <button class="btn btn-danger" id="stopBtn" style="display:none">Stop Agent</button>
+  <button class="btn btn-secondary" id="skipBtn">Skip This Resume</button>
+
+  <div class="status">
+    <div class="status-item">
+      <span class="status-label">Status</span>
+      <span class="status-value" id="statusValue">Idle</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Resumes Processed</span>
+      <span class="status-value" id="resumeCount">0</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Current Step</span>
+      <span class="status-value" id="currentStep">-</span>
+    </div>
+  </div>
+
+  <div class="log-area" id="logArea"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
