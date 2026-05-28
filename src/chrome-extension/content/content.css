@@ -1,0 +1,67 @@
+/* AI Resume Agent - Content Script Styles */
+
+.ai-agent-overlay {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(15, 23, 42, 0.95);
+  color: #e2e8f0;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  z-index: 99999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  max-width: 300px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.ai-agent-overlay.minimized {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.ai-agent-overlay .title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #3b82f6;
+}
+
+.ai-agent-overlay .status {
+  margin-bottom: 4px;
+}
+
+.ai-agent-overlay .progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #1e293b;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.ai-agent-overlay .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.ai-agent-highlight {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px;
+  transition: outline-color 0.3s ease;
+}
+
+.ai-agent-filled {
+  outline: 2px solid #22c55e !important;
+  outline-offset: 2px;
+}
+
+.ai-agent-error {
+  outline: 2px solid #ef4444 !important;
+  outline-offset: 2px;
+}
