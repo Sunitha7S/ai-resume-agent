@@ -69,11 +69,28 @@ Return ONLY valid JSON matching this exact structure:
   "last_employer": ""
 }`;
 
+function detectProvider(apiKey: string): { baseURL: string; visionModel: string; textModel: string } {
+  if (apiKey.startsWith("gsk_")) {
+    return {
+      baseURL: "https://api.groq.com/openai/v1",
+      visionModel: "meta-llama/llama-4-scout-17b-16e-instruct",
+      textModel: "meta-llama/llama-4-scout-17b-16e-instruct",
+    };
+  }
+  return {
+    baseURL: "https://api.openai.com/v1",
+    visionModel: "gpt-4o",
+    textModel: "gpt-4o",
+  };
+}
+
 export class AIResumeExtractor {
   private client: OpenAI;
   private logger: winston.Logger;
   private maxRetries: number;
   private retryDelayMs: number;
+  private visionModel: string;
+  private textModel: string;
 
   constructor(
     apiKey: string,
@@ -81,10 +98,14 @@ export class AIResumeExtractor {
     maxRetries: number = 3,
     retryDelayMs: number = 2000
   ) {
-    this.client = new OpenAI({ apiKey });
+    const provider = detectProvider(apiKey);
+    this.client = new OpenAI({ apiKey, baseURL: provider.baseURL });
+    this.visionModel = provider.visionModel;
+    this.textModel = provider.textModel;
     this.logger = logger;
     this.maxRetries = maxRetries;
     this.retryDelayMs = retryDelayMs;
+    this.logger.info(`AI provider detected`, { baseURL: provider.baseURL, visionModel: provider.visionModel });
   }
 
   async extractFromImages(imageBuffers: Buffer[]): Promise<ResumeData> {
@@ -102,7 +123,7 @@ export class AIResumeExtractor {
     return withRetry(
       async () => {
         const response = await this.client.chat.completions.create({
-          model: "gpt-4o",
+          model: this.visionModel,
           messages: [
             {
               role: "system",
@@ -119,7 +140,6 @@ export class AIResumeExtractor {
           ],
           max_tokens: 4096,
           temperature: 0.1,
-          response_format: { type: "json_object" },
         });
 
         const content = response.choices[0]?.message?.content;
@@ -145,7 +165,7 @@ export class AIResumeExtractor {
     return withRetry(
       async () => {
         const response = await this.client.chat.completions.create({
-          model: "gpt-4o",
+          model: this.textModel,
           messages: [
             {
               role: "system",
@@ -159,7 +179,6 @@ export class AIResumeExtractor {
           ],
           max_tokens: 4096,
           temperature: 0.1,
-          response_format: { type: "json_object" },
         });
 
         const content = response.choices[0]?.message?.content;

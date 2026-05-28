@@ -32,8 +32,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+function getApiBaseUrl(apiKey) {
+  if (apiKey.startsWith("gsk_")) return "https://api.groq.com/openai/v1";
+  return "https://api.openai.com/v1";
+}
+
 async function callOpenAI(apiKey, payload) {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const baseUrl = getApiBaseUrl(apiKey);
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

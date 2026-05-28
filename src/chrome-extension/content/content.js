@@ -264,8 +264,12 @@ async function callOpenAI(apiKey, images, text) {
     content[0].text += `\n\nRESUME TEXT:\n${text}`;
   }
 
+  const model = apiKey.startsWith("gsk_")
+    ? "meta-llama/llama-4-scout-17b-16e-instruct"
+    : "gpt-4o";
+
   const payload = {
-    model: "gpt-4o",
+    model,
     messages: [
       {
         role: "system",
@@ -276,7 +280,6 @@ async function callOpenAI(apiKey, images, text) {
     ],
     max_tokens: 4096,
     temperature: 0.1,
-    response_format: { type: "json_object" },
   };
 
   return new Promise((resolve, reject) => {
